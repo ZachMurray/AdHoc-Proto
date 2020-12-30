@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-fs.readFile('/Users/joe/test.txt', 'utf8' , (err, data) => {
+fs.readFile('txnlog.dat', 'binary' , (err, data) => {
   if (err) {
     console.error(err)
     return
