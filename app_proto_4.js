@@ -51,10 +51,11 @@ function decode() {
       if ([0, 1].includes(RecordTypeEnum)) {
         let temp = data.slice(22, 30);
         console.log('temp', temp);
-        let AmountInDollars = data.slice(position, position += 8).readFloatBE(0);
+        let AmountInDollars = data.slice(position, position += 8).readDoubleBE(0);
         console.log('AmountInDollars', AmountInDollars);
       }
       console.log('position', position)
+      break;
     }
   });
 }
