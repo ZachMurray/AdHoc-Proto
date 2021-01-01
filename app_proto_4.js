@@ -1,6 +1,5 @@
 import fs from 'fs';
 let file = 'txnlog.dat';
-console.log(file, typeof (file)); // File object.
 
 function decode() {
   let Records = {};
@@ -13,13 +12,11 @@ function decode() {
       );
     Records.Version = data.slice(position, position += 1).readInt8();
     Records.Total = data.slice(position, position += 4).readUIntBE(0, 4);
-    position = 9;
-    console.log('Records', Records);
+    let RecordTypeEnum, Record;
     while (position < data.length) {
-      let Record = {};
-
-      Record.TypeEnum = data.slice(position, position += 1).readInt8();
-      switch (Record.TypeEnum) {
+      Record = {};
+      RecordTypeEnum = data.slice(position, position += 1).readInt8();
+      switch (RecordTypeEnum) {
         case 0:
           Record.Type = 'Debit';
           break;
@@ -38,10 +35,11 @@ function decode() {
       }
 
       Record.UnixTimeStamp = data.slice(position, position += 4).readIntBE(0, 4);
-      let UserId = data.slice(position, position += 8).readBigUInt64BE(0, 8);
-      if ([0, 1].includes(Record.TypeEnum)) {
-        let AmountInDollars = data.slice(position, position += 8).readDoubleBE(0);
+      Record.UserId = data.slice(position, position += 8).readBigUInt64BE(0, 8);
+      if ([0, 1].includes(RecordTypeEnum)) {
+        Record.AmountInDollars = data.slice(position, position += 8).readDoubleBE(0);
       }
+      console.log('Record', Record);
     }
   });
 }
