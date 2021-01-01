@@ -3,59 +3,45 @@ let file = 'txnlog.dat';
 console.log(file, typeof (file)); // File object.
 
 function decode() {
+  let Records = {};
   fs.readFile(file, (_err, data) => {
-    let t = new Uint8Array(data.slice(0, 4))
+    let position = 0;
+    Records.Name = new Uint8Array(data.slice(position, position += 4))
       .reduce(
         (accumulator, currentValue) => accumulator + String.fromCharCode(currentValue),
         ''
       );
-    console.log(t);
-
-    let version = data.slice(4, 5).readInt8();
-    console.log('version', version);
-
-    let NumberOfRecords = data.slice(5, 9).readUIntBE(0, 4);
-    console.log('NumberOfRecords', NumberOfRecords);
-
-    console.log('data.length', data.length);
-    let position = 9;
+    Records.Version = data.slice(position, position += 1).readInt8();
+    Records.Total = data.slice(position, position += 4).readUIntBE(0, 4);
+    position = 9;
+    console.log('Records', Records);
     while (position < data.length) {
       let Record = {};
 
-      let RecordTypeEnum = data.slice(position, ++position).readInt8();
-      console.log('RecordTypeEnum', RecordTypeEnum);
-      switch (RecordTypeEnum) {
+      Record.TypeEnum = data.slice(position, position += 1).readInt8();
+      switch (Record.TypeEnum) {
         case 0:
-          Record.recordType = 'Debit';
+          Record.Type = 'Debit';
           break;
         case 1:
-          Record.recordType = 'Credit';
+          Record.Type = 'Credit';
           break;
         case 2:
-          Record.recordType = 'StartAutopay';
+          Record.Type = 'StartAutopay';
           break;
         case 3:
-          Record.recordType = 'EndAutopay';
+          Record.Type = 'EndAutopay';
           break;
         default:
-          Record.recordType = '';
+          Record.Type = '';
           break;
       }
 
-      let UnixTimeStamp = data.slice(position, position += 4).readIntBE(0, 4);
-      console.log('UnixTimeStamp', UnixTimeStamp);
-
+      Record.UnixTimeStamp = data.slice(position, position += 4).readIntBE(0, 4);
       let UserId = data.slice(position, position += 8).readBigUInt64BE(0, 8);
-      console.log('UserId', UserId);
-
-      if ([0, 1].includes(RecordTypeEnum)) {
-        let temp = data.slice(22, 30);
-        console.log('temp', temp);
+      if ([0, 1].includes(Record.TypeEnum)) {
         let AmountInDollars = data.slice(position, position += 8).readDoubleBE(0);
-        console.log('AmountInDollars', AmountInDollars);
       }
-      console.log('position', position)
-      break;
     }
   });
 }
